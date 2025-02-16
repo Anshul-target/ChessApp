@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chess Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .img {
+            width: 100%;
+            height: auto;
+            max-width: 631px;
+            max-height: 550.4px;
+            display: block; /* Ensures the image behaves as a block element */
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #18181b; /* zinc-900 */
+        }
+
+        .content {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .controls div {
+            padding: 0.5rem 1rem;
+            background-color: #333;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease; /* Smooth hover transition */
+        }
+
+        .controls div:hover {
+            background-color: #555; /* Hover effect */
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #333; /* Same as Timer button */
+            min-width: 120px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .dropdown-content div {
+            padding: 0.5rem 1rem;
+            margin-bottom:5px;
+            color: white;
+            cursor: pointer;
+            background-color: #333; /* Same as Timer button */
+        }
+
+        /* Remove hover effect for dropdown items */
+        .dropdown-content div:hover {
+            background-color: #333; /* Same as Timer button */
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block; /* Show dropdown on hover */
+        }
+        .hide{
+          z-index: -1;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        <div class="bg-zinc-900">
+            <img src="/images/chess.png" class="img" alt="Chess Board">
+        </div>
+        <div  class="controls">
+            <div class="dropdown">
+                Timer
+                <div class="dropdown-content">
+                    <div onclick="setTimer(1)">1 min</div>
+                    <div onclick="setTimer(3)">3 min</div>
+                    <div onclick="setTimer(5)">5 min</div>
+                    <div onclick="setTimer(10)">10 min</div>
+                    <div onclick="setTimer(30)">30 min</div>
+                </div>
+            </div>
+            <div onclick="playGame()">Play</div>
+        </div>
+    </div>
+</div>
+
+<script>
+let dropdown=document.querySelector(".dropdown-content");
+let dropdownp=document.querySelector(".dropdown");
+let time=null;
+function setTimer(minutes) {
+    time = minutes;
+
+    // Update only the text of the Timer button, without modifying the dropdown structure
+    const timerButton = dropdownp.firstChild; // Access the text node of the button
+    timerButton.textContent =  minutes + " min";
+
+    // Hide the dropdown menu
+    dropdown.classList.add("hide");
+}
+
+dropdownp.addEventListener("click", () => {
+    // Toggle visibility of the dropdown menu
+    dropdown.classList.toggle("hide");
+});
+
+  function playGame() {
+    console.log("In the Game");
+    if (time == null) {
+        alert("Please select a timer before starting the game.");
+        return;
+    }
+
+    const timerData = { time: time };
+
+    fetch('/game', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json', // Indicate JSON payload
+        },
+        body: JSON.stringify(timerData), // Convert object to JSON
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to set timer');
+        }
+        return response.text(); // Handle plain text response (e.g., redirect URL)
+    })
+    .then(data => {
+        console.log('Timer set successfully. Redirecting to:', data);
+        window.location.href = "/game"; // Manually redirect to /game
+    })
+    .catch(error => {
+        console.error('Error setting timer:', error);
+        alert('Failed to start the game. Please try again.');
+    });
+}
+
+</script>
+</body>
+</html>

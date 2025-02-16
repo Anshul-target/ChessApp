@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Chess Game</title>
+
+<!--    <link rel="stylesheet" href="/css/styles.css">-->
+    <!-- Include chessboard.js CSS (optional) -->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">-->
+    <style>
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            grid-template-rows: repeat(8, minmax(0, 1fr));
+            width: 400px;
+            height: 400px;
+            transform: rotate(0deg);
+        }
+
+        .piece.white {
+            color: white;
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 1));
+
+        }
+        .piece.white.pawn {
+         color: white;
+    text-shadow: 0 0 2px black;
+        }
+
+
+        .piece.black {
+            color: black;
+        }
+         .piece.black.pawn {
+          color: black;
+    text-shadow: 0 0 2px white;
+         }
+
+        .flipped {
+            transform: rotate(180deg);
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .square.light {
+            background-color: #f0d9b5;
+        }
+
+        .square.dark {
+            background-color: #b58863;
+        }
+
+        .piece {
+            font-size: 36px;
+            cursor: pointer;
+        }
+
+        .piece.draggable {
+            cursor: grab;
+        }
+
+        .dragging {
+            opacity: 0.5;
+        }
+
+        /* Rotate pieces for black player */
+        .flipped .piece {
+            transform: rotate(180deg);
+        }
+        .currentPlayer{
+        color:aqua;
+        background-color:zinc
+
+        }
+
+        body{
+        position:relative;
+        }
+
+
+       .gameOver {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    color: rgb(231, 220, 190);
+    text-align: center;
+    position: fixed; /* Use fixed positioning to center on the screen */
+    top: 53%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for exact center */
+    background-color: rgb(38, 36, 33);
+    height: auto; /* Auto height based on content */
+    width: 90%; /* Responsive width */
+    max-width: 290px; /* Maximum width for larger screens */
+    gap: 12px;
+    border-radius: 10px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.gameOver span {
+    width: 100%;
+    border-top: 5px;
+    background-color: rgb(73, 58, 56);
+    padding: 18px;
+    border-radius: 4px;
+    padding-right: 25px;
+    box-sizing: border-box;
+}
+
+.gameOver button {
+    margin-left: 6px;
+    width: calc(100% - 12px); /* Adjust width to account for margin */
+    background-color: rgb(128, 181, 76);
+    padding: 19px;
+    border-radius: 9px;
+    box-sizing: border-box;
+        margin-bottom: 16px;
+}
+
+
+
+
+<!--        .gameOver {-->
+<!--    padding: 0;-->
+<!--    margin: 0;-->
+<!--    display: flex;-->
+<!--    flex-direction: column;-->
+<!--    color: rgb(231, 220, 190);-->
+<!--    top: 337px;-->
+<!--    text-align: center;-->
+<!--    left: 622px;-->
+<!--    position: absolute;-->
+<!--    background-color: rgb(38, 36, 33);-->
+<!--    height: 150px;-->
+<!--    width: 290px;-->
+<!--    gap: 12px;-->
+<!--    border-radius: 10px;-->
+<!--    /* background-color: red; */-->
+<!--}-->
+
+<!--        .gameOver span {-->
+<!--    width: 100%;-->
+<!--    border-top: 5px;-->
+<!--    background-color: rgb(73, 58, 56);-->
+<!--    padding: 18px;-->
+<!--    border-radius: 4px;-->
+<!--    padding-right: 25px;-->
+<!--}-->
+
+<!--.gameOver button {-->
+<!--    margin-left: 6px;-->
+<!--    width: 95%;-->
+<!--    background-color: rgb(128, 181, 76);-->
+<!--    padding: 19px;-->
+<!--    border-radius: 9px;-->
+<!--}-->
+
+<!--new modified code-->
+
+    </style>
+</head>
+<body>
+<div class="flex bg-zinc-900 justify-center">
+    <div class="currentPlayer bg-zinc-900 "></div>
+</div>
+<div class="w-full h-screen flex flex-col items-center justify-center bg-zinc-900 gap-y-2">
+
+    <div class="bg-red flex justify-between w-96  ">
+        <button class="bg-zinc-900 rounded-md w-24 h-10">Opponent</button>
+        <button id="b" class=" bg-zinc-800 rounded-md w-32 h-10 time">Timer</button>
+    </div>
+    <div class="chessboard w-96 h-96 bg-red-400"></div>
+    <div class="bg-red flex justify-between w-96  ">
+        <button class="bg-zinc-900 rounded-md w-24 h-10 text-slate-100 ">You</button>
+        <button id="w" class=" bg-zinc-800 rounded-md w-32 h-10 time">Timer</button>
+    </div>
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="/js/chess.js"></script>
+<script src="/js/socket.js"></script>
+<script src="/js/app.js"></script>
+<div class="gameOver"></div>
+</body>
+</html>
