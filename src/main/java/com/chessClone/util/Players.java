@@ -20,6 +20,9 @@ public static String currentPlayer="w";
 
  private static Map<Integer, List<String>> playerColor=new HashMap<>();
 
+
+
+// time -> List[pid,pid]
  public static Map<Integer, List<String>> getPlayerColor() {
   return playerColor;
  }

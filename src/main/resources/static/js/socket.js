@@ -220,6 +220,7 @@ class ChessClient {
         this.chess = chess; // Chess.js instance
         this.boardElement = boardElement; // DOM element for the chessboard
         this.playerPlaying = playerPlaying; // DOM element for displaying the current player
+
         this.roomId = null; // Unique room ID for this game session
         this.gameSubscription = null; // STOMP subscription for game updates
         this.playerRole = null; // Role of the player (white, black, spectator)
@@ -235,161 +236,161 @@ class ChessClient {
         this.gameOver=null;
 //        const nodeList = document.querySelectorAll(".example");
         this.timeElement = document.querySelectorAll(".time"); // DOM element for the timer display
+        this.playerRemoved=false;
     }
 
     connect() {
         this.client.connect({}, (frame) => {
             console.log("Connected:", frame);
 
-            // Send a join request to the server
-            this.client.send("/app/join", {}, JSON.stringify({}));
 
             // Subscribe to the playerRole updates
             this.client.subscribe("/topic/playerRole", (message) => {
-                try {
-                    const response = JSON.parse(message.body);
-
-
-
-                    if (response.time && !this.isTimeInitialized) {
-                        this.time = response.time;
-                        this.minutes = this.time;
-
-
-                        this.isTimeInitialized = true;
-                    }
-
-                      if (!this.playerRole && response.role) {
-                                            this.playerRole = response.role;
-
-                                            // Flip the board if the role is "black"
-                                            if (this.playerRole === "b") {
-                                            const chessPlayers=document.getElementsByClassName("time");
-                                          for(let i=0;i<chessPlayers.length;i++){
-                                          if(i%2==0)
-                                            chessPlayers[i].id="w";
-                                            else
-                                            chessPlayers[i].id="b";
-
-                                             }
-                                             const playerTime=document.getElementById("b");
-                                              playerTime.innerText=this.time+" :"+" 00";
-                                                this.boardElement.classList.add("flipped");
-                                            } else {
-
-
-                                            const chessPlayers=document.getElementsByClassName("time");
-
-
-                                            for(let i=0;i<chessPlayers.length;i++){
-                                                if(i%2==0)
-                                                 chessPlayers[i].id="b";
-                                                 else
-                                                    chessPlayers[i].id="w";
-
-                                                      }
-
-                                                      const playerTime=document.getElementById("b");
-                                                      playerTime.innerText=this.time+" :"+" 00";
-
-                                                this.boardElement.classList.remove("flipped");
-                                            }
-
-                                            // Handle spectators separately
-                                            if (this.playerRole === "spectator") {
-                                                this.playerRole = null;
-                                            }
-
-                                            this.renderBoard();
-                                        }
-
-                    // Process the response if roomId is provided and not yet initialized
-                    if (response.roomId && !this.isInitialized && this.time === response.time) {
-                        this.roomId = response.roomId;
-                        this.isInitialized = true; // Mark this instance as initialized
-
-
-                       let Timeobj={
-                         seconds:0,
-                         minutes:this.time,
-                                 }
-
-
-                       let Timeobj1={
-                         seconds:0,
-                         minutes:this.time,
-                                 }
-                     this.map.set("b",Timeobj);
-                     this.map.set("w",Timeobj1);
-
-
-
-//                       if(player.role=="b"){
-//                                         let blackTimeobj={
-//                                           seconds:0,
-//                                             minutes:response.time,
-//                                                      }
-//                                            this.map.set("b",blackTimeobj);
-//                                         }
-//                                         if(response.role=="w" ){
-//                                           let whiteTimeobj={
-//                                                               seconds:0,
-//                                                                 minutes:response.time,
-//                                                       }
-//                                                                this.map.set("w",whiteTimeobj);
-//                                         }
-                        // Unsubscribe from the previous game topic if already subscribed
-                        if (this.gameSubscription) {
-                            this.gameSubscription.unsubscribe();
-                        }
-
-                        // Subscribe to the updated game topic for this specific room
-                        this.gameSubscription = this.client.subscribe(
-                            `/topic/game/${this.time}/${this.roomId}`,
-                            (gameMessage) => {
-
-                                const gameResponse = JSON.parse(gameMessage.body);
-                                console.log("Game update:", gameResponse);
-
-                                if (gameResponse.valid) {
-                                    const move = {
-                                        from: gameResponse.from,
-                                        to: gameResponse.to,
-                                    };
-
-                                    this.currentTurn=gameResponse.turn;
-                                     clearInterval(this.intervalId);
-                                     this.startTimer();
-                                      // Apply the move locally and update the board
-                                    this.chess.move(move);
-                                    this.playerPlaying.innerText =
-                                        gameResponse.turn === "b" ? "Black turn" : "White turn";
-                                    this.renderBoard();
-                                } else {
-                                    console.error("Invalid move received from server");
+                            try {
+                                const response = JSON.parse(message.body);
+                                       console.log(response.role);
+                                if (response.time && !this.isTimeInitialized) {
+                                    this.time = response.time;
+                                    this.minutes = this.time;
+                                    this.isTimeInitialized = true;
                                 }
+
+                                  if (!this.playerRole && response.role) {
+                                                        this.playerRole = response.role;
+
+                                                        // Flip the board if the role is "black"
+                                                        if (this.playerRole === "b") {
+                                                        const chessPlayers=document.getElementsByClassName("time");
+                                                      for(let i=0;i<chessPlayers.length;i++){
+                                                      if(i%2==0)
+                                                        chessPlayers[i].id="w";
+                                                        else
+                                                        chessPlayers[i].id="b";
+
+                                                         }
+                                                         const playerTime=document.getElementById("b");
+                                                          playerTime.innerText=this.time+" :"+" 00";
+                                                            this.boardElement.classList.add("flipped");
+                                                        } else {
+
+
+                                                        const chessPlayers=document.getElementsByClassName("time");
+
+
+                                                        for(let i=0;i<chessPlayers.length;i++){
+                                                            if(i%2==0)
+                                                             chessPlayers[i].id="b";
+                                                             else
+                                                                chessPlayers[i].id="w";
+
+                                                                  }
+
+                                                                  const playerTime=document.getElementById("b");
+                                                                  playerTime.innerText=this.time+" :"+" 00";
+
+                                                            this.boardElement.classList.remove("flipped");
+                                                        }
+
+                                                        // Handle spectators separately
+                                                        if (this.playerRole === "spectator") {
+                                                            this.playerRole = null;
+                                                        }
+                                                  console.log("Reached here...")
+                                                        this.renderBoard();
+                                                    }
+
+                                // Process the response if roomId is provided and not yet initialized
+                                if (response.roomId && !this.isInitialized && this.time === response.time) {
+                                    this.roomId = response.roomId;
+                                    this.isInitialized = true; // Mark this instance as initialized
+
+
+                                   let Timeobj={
+                                     seconds:0,
+                                     minutes:this.time,
+                                             }
+
+
+                                   let Timeobj1={
+                                     seconds:0,
+                                     minutes:this.time,
+                                             }
+                                 this.map.set("b",Timeobj);
+                                 this.map.set("w",Timeobj1);
+
+
+
+            //                       if(player.role=="b"){
+            //                                         let blackTimeobj={
+            //                                           seconds:0,
+            //                                             minutes:response.time,
+            //                                                      }
+            //                                            this.map.set("b",blackTimeobj);
+            //                                         }
+            //                                         if(response.role=="w" ){
+            //                                           let whiteTimeobj={
+            //                                                               seconds:0,
+            //                                                                 minutes:response.time,
+            //                                                       }
+            //                                                                this.map.set("w",whiteTimeobj);
+            //                                         }
+                                    // Unsubscribe from the previous game topic if already subscribed
+                                    if (this.gameSubscription) {
+                                        this.gameSubscription.unsubscribe();
+                                    }
+
+                                    // Subscribe to the updated game topic for this specific room
+                                    this.gameSubscription = this.client.subscribe(
+                                        `/topic/game/${this.time}/${this.roomId}`,
+                                        (gameMessage) => {
+
+                                            const gameResponse = JSON.parse(gameMessage.body);
+                                            console.log("Game update:", gameResponse);
+
+                                            if (gameResponse.valid) {
+                                                const move = {
+                                                    from: gameResponse.from,
+                                                    to: gameResponse.to,
+                                                };
+
+                                                this.currentTurn=gameResponse.turn;
+                                                 clearInterval(this.intervalId);
+                                                 this.startTimer();
+                                                  // Apply the move locally and update the board
+                                                this.chess.move(move);
+                                                this.playerPlaying.innerText =
+                                                    gameResponse.turn === "b" ? "Black turn" : "White turn";
+                                                this.renderBoard();
+                                            } else {
+                                                console.error("Invalid move received from server");
+                                            }
+                                        }
+                                    );
+
+                                    // Start the timer if it hasn't started already
+                                    if (!this.isTimerStarted) {
+                                        this.isTimerStarted = true;
+                                        this.startTimer();
+                                    }
+                                }
+
+                                // Assign player role if not already set
+
+                            } catch (error) {
+                                console.error("Error processing player role:", error);
                             }
-                        );
+                        });
 
-                        // Start the timer if it hasn't started already
-                        if (!this.isTimerStarted) {
-                            this.isTimerStarted = true;
-                            this.startTimer();
-                        }
-                    }
+            // Send a join request to the server
+            this.client.send("/app/join", {}, JSON.stringify({}));
 
-                    // Assign player role if not already set
 
-                } catch (error) {
-                    console.error("Error processing player role:", error);
-                }
-            });
         }, (error) => {
             console.error("Connection error:", error);
         });
     }
 findTime() {
-    if (this.minutes === 0 && this.seconds === 0)
+    if ((this.minutes === 0 && this.seconds === 0) || this.playerRemoved)
          {
             // Time is up
             let container = document.querySelector("body");
@@ -435,6 +436,7 @@ findTime() {
     const formattedMinutes = this.minutes.toString().padStart(2, "0");
     const formattedSeconds = this.seconds.toString().padStart(2, "0");
     const newTime = `${formattedMinutes} : ${formattedSeconds}`;
+//    b ,w
      const playerTime=document.getElementById(this.currentTurn);
      playerTime.innerText=newTime;
 
@@ -519,6 +521,9 @@ reconnect() {
     renderBoard() {
         const board = this.chess.board();
         this.boardElement.innerHTML = "";
+
+        this.draggedPiece = null;
+        this.sourceSquare = null;
         board.forEach((row, rowindex) => {
             row.forEach((square, squareindex) => {
                 const squareElement = document.createElement("div");
@@ -594,13 +599,24 @@ reconnect() {
     }
 
     disconnect() {
+    console.log(`/stopGame/${this.roomId}`);
         if (this.client && this.client.connected) {
             // Send a leave message to the server
-            const sendTime = {
+            const send = {
                 time: this.time,
+                roomId:this.roomId,
+                playerRole:this.playerRole
             };
 
-            this.client.send("/app/leave", {}, JSON.stringify(sendTime));
+ this.client.subscribe(`/stopGame/${this.roomId}`,(response=>{
+ " sucess && removed player "
+ if(response.sucess){
+const time =document.getElementById(response.removedPlayer);
+this.playerRemoved=true;
+this.findTime(playerRemoved);
+ }
+ }))
+            this.client.send("/app/leave", {}, JSON.stringify(send));
             this.client.disconnect(() => {
                 console.log("Disconnected from WebSocket");
             });

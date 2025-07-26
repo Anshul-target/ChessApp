@@ -14,30 +14,36 @@ private static boolean isModified=false;
    static boolean Player2=true;
 
     public static synchronized String assignPlayer(String sessionId,Integer time){
-
+        System.out.println("Printing the time "+time);
         Map<Integer,List<String>> playerColor=Players.getPlayerColor();
         if(!playerColor.containsKey(time)){
             List<String>colorList=new ArrayList<>();
             colorList.add(0,null);
             colorList.add(1,null);
             playerColor.put(time,colorList);
+
         }
-         if(playerColor.get(time).get(0)==null){
-             playerColor.get(time).set(0,sessionId);
-            return "b";
-        }
+        System.out.println("Checking time "+ playerColor.containsKey(time));
+
+         if(playerColor.get(time).get(0)==null) {
+             playerColor.get(time).set(0, sessionId);
+             System.out.println("Cheking the list "+playerColor.get(time));
+             return "b";
+         }
        else if(playerColor.get(time).get(1)==null){
              playerColor.get(time).set(1,sessionId);
+             System.out.println("Cheking the list "+playerColor.get(time));
             return "w";
         }
         else{
            return "spectator";
         }
 
+
     }
 
 
-    public static void removePlayer(String sessionId,Integer time)  {
+    public static boolean removePlayer(String sessionId,Integer time)  {
 
         Game removeGame=null;
         int playerNo=0;
@@ -78,6 +84,7 @@ private static boolean isModified=false;
                 Player1=true;
                 Player2=true;
             }
+            return  true;
 
         }
 
@@ -111,19 +118,30 @@ private static boolean isModified=false;
 
             Map<Integer,List<Boolean>> pieceColr=PlayOnlineService.getPieceColorMap();
             Map<Integer,List<String>> playerRole=Players.getPlayerColor();
-            if (playerRole.get(time).get(0)!=null && playerRole.get(time).get(0).equals(sessionId)){
-                playerRole.get(time).set(0,null);
-                pieceColr.get(time).set(0,false);
-            }
+            System.out.println("here it is"+playerRole.get(time));
+            System.out.println(playerRole.get(time).get(0));
+            System.out.println(playerRole.get(time).get(1));
+         try {
+             if (playerRole.get(time).get(0)!=null && playerRole.get(time).get(0).equals(sessionId)){
+                 playerRole.get(time).set(0,null);
+                 pieceColr.get(time).set(0,false);
+             }
+         }
+         catch (Exception e){
+             System.out.println(e.getMessage());
+             System.out.println(e.getStackTrace());
+         }
+
             if ( playerRole.get(time).get(1)!=null && playerRole.get(time).get(1).equals(sessionId)){
                 pieceColr.get(time).set(1,false);
                 playerRole.get(time).set(1,null);
             }
 
-
+return  true;
         }
         else {
             isPresentInGame=false;
+            return  false;
         }
 
     }

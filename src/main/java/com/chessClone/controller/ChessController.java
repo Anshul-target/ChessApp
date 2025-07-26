@@ -42,10 +42,13 @@ public String handleHello(String message) {
     @SendTo("/topic/playerRole")
     public static   Map<String,Object> handleJoin(StompHeaderAccessor headerAccessor){
     String sessionId=headerAccessor.getSessionId();
+    System.out.println(headerAccessor.getSessionId());
     String role=null;
     if(GameTime.getPlayTime()!=null){
 Integer time=GameTime.getPlayTime();
+
          role =playerService.assignPlayer(sessionId,time);
+        System.out.println("printing the role "+role);
     }
 
         Map<String,Object> result=new HashMap<>();
@@ -59,11 +62,32 @@ Integer time=GameTime.getPlayTime();
 }
 
 @MessageMapping("/leave")
-public static void handleLeave(StompHeaderAccessor headerAccessor,Map<String,Integer> timemap) {
-    Integer time=timemap.get("time");
 
+public  void handleLeave(StompHeaderAccessor headerAccessor,Map<String,Object> timemap) {
+    Integer time=(Integer) timemap.get("time");
+    String room=(String) timemap.get("roomId");
+    String playerRole=(String) timemap.get("playerRole");
+    Map<String,Object> result=new HashMap<>();
+
+//     const send = {
+//            time: this.time,
+//            roomId:this.roomId,
+//            playerRole:this.playerRole
+//            };
+    System.out.println(headerAccessor.getSessionId());
     System.out.println("One player left");
-    playerService.removePlayer(headerAccessor.getSessionId(),time);
+     boolean isRemoved= playerService.removePlayer(headerAccessor.getSessionId(),time);
+     if(isRemoved){
+//         " sucess && removed player "
+         result.put("sucess",true);
+
+         result.put("removedPlayer",playerRole=="b"?"b":"w");
+//         /stopGame/${this.roomId}
+         String roomId=("/stopGame/"+room);
+         System.out.println(roomId);
+         messagingTemplate.convertAndSend(roomId,result);
+     }
+
 }
 
 //Any move
