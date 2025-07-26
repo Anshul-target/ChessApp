@@ -7,10 +7,7 @@ import lombok.Setter;
 
 import java.util.*;
 
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class Room {
     private static Queue<PlayerSession> playerQueue=new ArrayDeque<>();
     private static Map<Integer, List<Queue<PlayerSession>>> map=new HashMap<>();
