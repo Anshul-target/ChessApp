@@ -119,6 +119,7 @@
 let dropdown=document.querySelector(".dropdown-content");
 let dropdownp=document.querySelector(".dropdown");
 let time=null;
+
 function setTimer(minutes) {
     time = minutes;
 
@@ -135,7 +136,7 @@ dropdownp.addEventListener("click", () => {
     dropdown.classList.toggle("hide");
 });
 
-  function playGame() {
+function playGame() {
     console.log("In the Game");
     if (time == null) {
         alert("Please select a timer before starting the game.");
@@ -147,24 +148,53 @@ dropdownp.addEventListener("click", () => {
     fetch('/game', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json', // Indicate JSON payload
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify(timerData), // Convert object to JSON
+        body: JSON.stringify(timerData)
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Failed to set timer');
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        return response.text(); // Handle plain text response (e.g., redirect URL)
+        return response.json();
     })
     .then(data => {
-        console.log('Timer set successfully. Redirecting to:', data);
-        window.location.href = "/game"; // Manually redirect to /game
+        console.log('Response:', data);
+        if (data.status === 'success') {
+            console.log('Timer set successfully. Redirecting to:', data.redirectUrl);
+            window.location.href = data.redirectUrl;
+        } else {
+            throw new Error(data.message || 'Failed to start game');
+        }
     })
     .catch(error => {
         console.error('Error setting timer:', error);
         alert('Failed to start the game. Please try again.');
     });
+}
+
+// Alternative approach using form submission (more reliable for redirects)
+function playGameWithForm() {
+    console.log("In the Game (Form approach)");
+    if (time == null) {
+        alert("Please select a timer before starting the game.");
+        return;
+    }
+
+    // Create a hidden form and submit it
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/game';
+    form.style.display = 'none';
+
+    const timeInput = document.createElement('input');
+    timeInput.type = 'hidden';
+    timeInput.name = 'time';
+    timeInput.value = time;
+
+    form.appendChild(timeInput);
+    document.body.appendChild(form);
+    form.submit();
 }
 
 </script>
