@@ -15,12 +15,12 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "forward:/index.html"; // Serve static/index.html
+        return "index"; // Looks for templates/index.html
     }
 
     @GetMapping("/game")
     public String serveGamePage() {
-        return "forward:/game.html"; // Serve static/game.html at /game URL
+        return "game"; // Looks for templates/game.html
     }
 
     @PostMapping("/game")
